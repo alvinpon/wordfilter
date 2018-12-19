@@ -13,9 +13,9 @@
 
 int main(int argc, const char * argv[]) {
     unsigned int option;
-    std::string message, expletive;
+    std::string string;
     word_filter word_filter;
-    
+
     do {
         std::cout << "Selet what you want to do." << std::endl
                   << "0. Exit"                    << std::endl
@@ -24,30 +24,20 @@ int main(int argc, const char * argv[]) {
                   << "3. Filter expletive"        << std::endl;
         std::cin >> option;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        
-        if (option == 1 or option == 2) {
-            std::cout << "Enter a expletive: ";
-            std::getline(std::cin, expletive);
-            
+
+        if (0 < option && option < 4) {
+            std::cout << "Enter a string: ";
+            std::getline(std::cin, string);
+
             if (option == 1) {
-                word_filter.add_expletive(expletive);
+                std::cout << (word_filter.add_expletive(string) ? "added successfully" : "added unsuccessfully") << std::endl;
+            } else if (option == 2) {
+                std::cout << (word_filter.remove_expletive(string) ? "removed successfully" : "removed unsuccessfully") << std::endl;
             } else {
-                word_filter.remove_expletive(expletive);
+                std::cout << word_filter.filter_expletive(string) << std::endl;
             }
-        } else if (option == 3) {
-            std::cout << "Enter a message: ";
-            std::getline(std::cin, message);
-            
-            word_filter.filter_expletive(message);
-            
-            std::cout << message << std::endl;
         }
     } while(option not_eq 0);
     
     return 0;
 }
-
-//    std::string message = "不管我前面寫什麼，把幹你娘給我替換掉。";
-//    std::regex regex("幹你娘");
-//    message = std::regex_replace(message, regex, "*");
-//    std::cout << message << std::endl;

@@ -9,19 +9,16 @@
 #ifndef word_filter_hpp
 #define word_filter_hpp
 
-#include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <regex>
 #include <set>
 #include <string>
-#include <vector>
 
 class word_filter {
 private:
     std::string::size_type divisor;
-    std::map<std::string::size_type, std::vector<std::string>> expletives;
+    std::map<std::string::size_type, std::set<std::string>> expletives;
     
 public:
     word_filter();
@@ -29,7 +26,7 @@ public:
     
     bool add_expletive(std::string & expletive);
     bool remove_expletive(std::string & expletive);
-    void filter_expletive(std::string & message);
+    std::string filter_expletive(std::string message);
 };
 
 #endif /* word_filter_hpp */

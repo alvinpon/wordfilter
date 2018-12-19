@@ -11,15 +11,11 @@
 word_filter::word_filter() {
     divisor = 50;
 
-    std::fstream fstream("./profanity.txt", fstream.in);
+    std::fstream fstream("/Users/alvinpon/Library/Mobile Documents/com~apple~CloudDocs/WordFilter/WordFilter/profanity.txt", fstream.in);
     if (fstream.is_open()) {
         for (std::string expletive; std::getline(fstream, expletive, ',');) {
-            expletives[expletive.size() % divisor].push_back(expletive);
+            expletives[expletive.size() % divisor].insert(expletive);
         }
-    }
-
-    for (auto it = expletives.begin(); it != expletives.end(); it++) {
-        std::sort((*it).second.begin(), (*it).second.end());
     }
 }
 
@@ -29,13 +25,8 @@ word_filter::word_filter(std::string file_path) {
     std::fstream fstream(file_path, fstream.in);
     if (fstream.is_open()) {
         for (std::string expletive; std::getline(fstream, expletive, ',');) {
-            std::cout << expletive << std::endl;
-            expletives[expletive.size() % divisor].push_back(expletive);
+            expletives[expletive.size() % divisor].insert(expletive);
         }
-    }
-
-    for (auto it = expletives.begin(); it != expletives.end(); it++) {
-        std::sort((*it).second.begin(), (*it).second.end());
     }
 }
 
@@ -43,8 +34,8 @@ bool word_filter::add_expletive(std::string & expletive) {
     bool added = false;
     std::string::size_type index = expletive.size() % divisor;
 
-    if (expletive.empty() == false && std::find(expletives[index].begin(), expletives[index].end(), expletive) == expletives[index].end()) {
-        expletives[index].insert(std::upper_bound(expletives[index].begin(), expletives[index].end(), expletive), expletive);
+    if (expletive.empty() == false) {
+        expletives[index].insert(expletive);
         added = true;
     }
 
@@ -56,7 +47,7 @@ bool word_filter::remove_expletive(std::string & expletive) {
     std::string::size_type index = expletive.size() % divisor;
 
     if (expletive.empty() == false) {
-        auto it = std::find(expletives[index].begin(), expletives[index].end(), expletive);
+        auto it = expletives[index].find(expletive);
         if (it != expletives[index].end()) {
             expletives[index].erase(it);
             removed = true;
@@ -66,7 +57,7 @@ bool word_filter::remove_expletive(std::string & expletive) {
     return removed;
 }
 
-void word_filter::filter_expletive(std::string & message) {
+std::string word_filter::filter_expletive(std::string message) {
     std::regex word_regex("[^\\s]+");
     std::set<std::string> swear_words;
     auto begin = std::sregex_iterator(message.begin(), message.end(), word_regex), end = std::sregex_iterator();
@@ -75,7 +66,7 @@ void word_filter::filter_expletive(std::string & message) {
         std::string word = (*it).str();
         std::string::size_type index = word.size() % divisor;
 
-        if (std::find(expletives[index].begin(), expletives[index].end(), word) != expletives[index].end()) {
+        if (expletives[index].find(word) != expletives[index].end()) {
             swear_words.insert(word);
         }
     }
@@ -84,4 +75,6 @@ void word_filter::filter_expletive(std::string & message) {
         std::regex swear_word_regex(swear_word);
         message = std::regex_replace(message, swear_word_regex, "*");
     }
+
+    return message;
 }
