@@ -25,7 +25,7 @@ int main(int argc, const char * argv[]) {
         std::cin >> option;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        if (0 < option && option < 4) {
+        if (1 <= option && option <= 3) {
             std::cout << "Enter a string: ";
             std::getline(std::cin, string);
 
@@ -37,7 +37,7 @@ int main(int argc, const char * argv[]) {
                 std::cout << word_filter.filter_expletive(string) << std::endl;
             }
         }
-    } while(option not_eq 0);
-    
+    } while (option not_eq 0);
+
     return 0;
 }
