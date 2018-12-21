@@ -21,8 +21,8 @@ sentence_generator::sentence_generator() {
 /**
  load words.
 
- @param file_path   a string describing where your file is.
- @param words       a vector used for containing a lot of words.
+ @param file_path a string descripting where your file location is.
+ @param words     a vector holding words.
  */
 void sentence_generator::read_words(std::string && file_path, std::vector<std::string> & words) {
     std::fstream fstream(file_path);
@@ -31,29 +31,24 @@ void sentence_generator::read_words(std::string && file_path, std::vector<std::s
             words.push_back(word);
         }
     }
+    std::sort(words.begin(), words.end());
 }
 
 /**
- generate a struct message whose expletive count and selected expletives will be recorded, and sentence are created by uniform distribution.
+ assign values to the message.
 
- @param result                      a variable used for checking whether it's adding an expletive or not.
- @param mt19937                     a mt19937.
- @param uniform_int_distribution    a uniform_int_distribution used for creating an index created by uniform distribution.
- @param words                       a vector used for holding words.
- @param message                     a message which contains expletive count, selected expletives, and a randomly generated sentence.
+ @param message a message which contains expletive count, selected expletives, and a randomly generated sentence.
+ @param mt19937 a mt19937.
+ @param words   a vector used for holding words.
  */
-void sentence_generator::randomly_select_word(message & message,
-                                              std::uniform_int_distribution<>::result_type & result,
-                                              std::mt19937 mt19937,
-                                              std::uniform_int_distribution<> & uniform_int_distribution,
-                                              std::vector<std::string> & words) {
+void sentence_generator::randomly_select_word(message & message, std::mt19937 & mt19937, std::vector<std::string> & words) {
     std::size_t index;
 
     uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)words.size() - 1));
     index = uniform_int_distribution(mt19937);
     message.sentence += words[index] + ' ';
 
-    if (result == 2) {
+    if (std::binary_search(expletives.begin(), expletives.end(), words[index])) {
         message.expletive_count++;
         message.selected_expletives.push_back(words[index]);
     }
@@ -66,37 +61,35 @@ void sentence_generator::randomly_select_word(message & message,
  */
 message sentence_generator::generate_sentence() {
     message message {};
-    std::random_device random_device;
     std::mt19937 mt19937(random_device());
-    std::uniform_int_distribution<> uniform_int_distribution;
-    std::uniform_int_distribution<>::result_type result;
 
     for (std::size_t i = 0; i < 100; i++) {
         uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, 6));
-        switch ((result = uniform_int_distribution(mt19937))) {
+        switch (uniform_int_distribution(mt19937)) {
             case 0:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, adjectives);
+                randomly_select_word(message, mt19937, adjectives);
                 break;
             case 1:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, adverbs);
+                randomly_select_word(message, mt19937, adverbs);
                 break;
             case 2:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, expletives);
+                randomly_select_word(message, mt19937, expletives);
                 break;
             case 3:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, nouns);
+                randomly_select_word(message, mt19937, nouns);
                 break;
             case 4:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, prepositions);
+                randomly_select_word(message, mt19937, prepositions);
                 break;
             case 5:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, pronouns);
+                randomly_select_word(message, mt19937, pronouns);
                 break;
             default:
-                randomly_select_word(message, result, mt19937, uniform_int_distribution, verbs);
+                randomly_select_word(message, mt19937, verbs);
                 break;
         }
     }
 
+    message.sentence.erase(message.sentence.size() - 1);
     return message;
 }

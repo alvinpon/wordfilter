@@ -13,10 +13,10 @@
 #include "word_filter.hpp"
 
 int main(int argc, const char * argv[]) {
-    word_filter word_filter;
     sentence_generator sentence_generator;
+    word_filter word_filter;
 
-    for (std::size_t i = 0; i < 1; i++) {
+    for (std::size_t i = 0; i < 200; i++) {
         message message1, message2;
 
         message1 = sentence_generator.generate_sentence();

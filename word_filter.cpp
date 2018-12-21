@@ -59,7 +59,7 @@ bool word_filter::remove_expletive(std::string & expletive) {
 }
 
 /**
- filter out expletives within original_message, and creat a filtered message.
+ filter out expletives within original_message, and return a filtered message.
 
  @param     original_message    an original message which contains an original expletive count, selected expletives, and sentence.
  @return    filtered_message    a filtered message which contains a filtered expletive count, selected expletives, and sentence.
@@ -67,16 +67,13 @@ bool word_filter::remove_expletive(std::string & expletive) {
 message word_filter::filter_expletive(message original_message) {
     message filtered_message {0, original_message.sentence};
     std::regex word_regex("[^\\s]+");
-    std::sregex_iterator begin = std::sregex_iterator(filtered_message.sentence.begin(),
-                                                      filtered_message.sentence.end(),
-                                                      word_regex),
-                         end = std::sregex_iterator();
+    std::sregex_iterator begin = std::sregex_iterator(filtered_message.sentence.begin(), filtered_message.sentence.end(), word_regex), end = std::sregex_iterator();
 
-    for (std::sregex_iterator it = begin; it != end; it++) {
-        std::string word = (*it).str();
+    for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
+        std::string word = (*iterator).str();
         std::string::size_type index = word.size() % divisor;
 
-        if (expletives[index].find(word) != expletives[index].end()) {
+        if (std::binary_search(expletives[index].begin(), expletives[index].end(), word)) {
             filtered_message.selected_expletives.push_back(word);
         }
     }
