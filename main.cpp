@@ -7,37 +7,24 @@
 //
 
 #include <iostream>
-#include <string>
 
+#include "message.hpp"
+#include "sentence_generator.hpp"
 #include "word_filter.hpp"
 
 int main(int argc, const char * argv[]) {
-    unsigned int option;
-    std::string string;
     word_filter word_filter;
+    sentence_generator sentence_generator;
 
-    do {
-        std::cout << "Selet what you want to do." << std::endl
-                  << "0. Exit"                    << std::endl
-                  << "1. Add expletive"           << std::endl
-                  << "2. Remove expletive"        << std::endl
-                  << "3. Filter expletive"        << std::endl;
-        std::cin >> option;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    for (std::size_t i = 0; i < 1; i++) {
+        message message1, message2;
 
-        if (1 <= option && option <= 3) {
-            std::cout << "Enter a string: ";
-            std::getline(std::cin, string);
+        message1 = sentence_generator.generate_sentence();
+        message2 = word_filter.filter_expletive(message1);
 
-            if (option == 1) {
-                std::cout << (word_filter.add_expletive(string) ? "added successfully" : "added unsuccessfully") << std::endl;
-            } else if (option == 2) {
-                std::cout << (word_filter.remove_expletive(string) ? "removed successfully" : "removed unsuccessfully") << std::endl;
-            } else {
-                std::cout << word_filter.filter_expletive(string) << std::endl;
-            }
-        }
-    } while (option not_eq 0);
+        std::cout << message1.expletive_count << " expletives\n" << message1.sentence << '\n' << std::endl;
+        std::cout << message2.expletive_count << " expletives\n" << message2.sentence << '\n' << std::endl;
+    }
 
     return 0;
 }

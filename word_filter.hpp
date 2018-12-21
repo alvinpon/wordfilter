@@ -15,18 +15,19 @@
 #include <set>
 #include <string>
 
+#include "message.hpp"
+
 class word_filter {
 private:
     std::string::size_type divisor;
     std::map<std::string::size_type, std::set<std::string>> expletives;
-    
+
 public:
     word_filter();
-    word_filter(std::string file_path);
-    
+
     bool add_expletive(std::string & expletive);
     bool remove_expletive(std::string & expletive);
-    std::string filter_expletive(std::string message);
+    message filter_expletive(message original_message);
 };
 
 #endif /* word_filter_hpp */
