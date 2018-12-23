@@ -14,6 +14,7 @@ word_filter::word_filter() {
     std::fstream fstream("./dictionary/expletives.txt", fstream.in);
     if (fstream.is_open()) {
         for (std::string expletive; std::getline(fstream, expletive, ',');) {
+            // O(log N)
             expletives[expletive.size() % divisor].insert(expletive);
         }
     }
@@ -30,6 +31,7 @@ bool word_filter::add_expletive(std::string & expletive) {
     std::string::size_type index = expletive.size() % divisor;
 
     if (expletive.empty() == false && expletives[index].count(expletive) == 0) {
+        // O(log N)
         expletives[index].insert(expletive);
         added = true;
     }
@@ -48,8 +50,10 @@ bool word_filter::remove_expletive(std::string & expletive) {
     std::string::size_type index = expletive.size() % divisor;
 
     if (expletive.empty() == false) {
+        // O(log N)
         auto it = expletives[index].find(expletive);
         if (it != expletives[index].end()) {
+            // O(log N)
             expletives[index].erase(it);
             removed = true;
         }
@@ -69,10 +73,12 @@ message word_filter::filter_expletive(message original_message) {
     std::regex word_regex("[^\\s]+");
     std::sregex_iterator begin = std::sregex_iterator(filtered_message.sentence.begin(), filtered_message.sentence.end(), word_regex), end = std::sregex_iterator();
 
+    // O(N)
     for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
         std::string word = (*iterator).str();
         std::string::size_type index = word.size() % divisor;
 
+        // O(log N)
         if (std::binary_search(expletives[index].begin(), expletives[index].end(), word)) {
             filtered_message.selected_expletives.push_back(word);
         }
@@ -100,6 +106,8 @@ void word_filter::detect_unfiltered_expletives(std::vector<std::string> & origin
     std::vector<std::string>::size_type size = filtered_expletives.size();
 
     unfiltered_expletives = original_expletives;
+
+    // O(MN)
     for (auto s = 0; unfiltered_expletives.empty() == false && s < size; s++) {
         auto iterator = std::find(unfiltered_expletives.begin(), unfiltered_expletives.end(), filtered_expletives[s]);
 

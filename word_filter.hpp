@@ -20,6 +20,7 @@
 class word_filter {
 private:
     std::string::size_type divisor;
+    // O(N)
     std::map<std::string::size_type, std::set<std::string>> expletives;
 
 public:

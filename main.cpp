@@ -68,9 +68,6 @@ void filter(std::size_t & total_expletives, std::size_t & total_filtered_expleti
         total_filtered_expletives += message1.expletive_count - unfiltered_expletives.size();
 
         write_result(result, message1, message2, unfiltered_expletives);
-
-        message1 = {};
-        message2 = {};
     }
 }
 
