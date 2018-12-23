@@ -25,7 +25,7 @@ private:
 
     void read_words(std::string && file_path, std::vector<std::string> & words);
     void randomly_select_word(message & message, std::mt19937 & mt19937, std::vector<std::string> & words);
-    
+
 public:
     sentence_generator();
 

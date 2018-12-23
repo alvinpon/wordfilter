@@ -79,10 +79,32 @@ message word_filter::filter_expletive(message original_message) {
     }
 
     filtered_message.expletive_count = filtered_message.selected_expletives.size();
-    for (auto & expletive : filtered_message.selected_expletives) {
-        std::regex curse_regex(expletive);
-        filtered_message.sentence = std::regex_replace(filtered_message.sentence, curse_regex, std::string(expletive.size(), '*'));
+    for (auto & selected_expletive : filtered_message.selected_expletives) {
+        std::regex expletive_regex(selected_expletive);
+        filtered_message.sentence = std::regex_replace(filtered_message.sentence, expletive_regex, std::string(selected_expletive.size(), '*'));
     }
 
     return filtered_message;
+}
+
+/**
+ detect unfiltered expletives.
+
+ @param     original_expletives     an original expletives.
+ @param     filtered expletives     an filtered expletives.
+ @param     unfiltered_expletives   an unfiltered expletives.
+ */
+void word_filter::detect_unfiltered_expletives(std::vector<std::string> & original_expletives,
+                                               std::vector<std::string> & filtered_expletives,
+                                               std::vector<std::string> & unfiltered_expletives) {
+    std::vector<std::string>::size_type size = filtered_expletives.size();
+
+    unfiltered_expletives = original_expletives;
+    for (auto s = 0; unfiltered_expletives.empty() == false && s < size; s++) {
+        auto iterator = std::find(unfiltered_expletives.begin(), unfiltered_expletives.end(), filtered_expletives[s]);
+
+        if (iterator != unfiltered_expletives.end()) {
+            unfiltered_expletives.erase(iterator);
+        }
+    }
 }

@@ -28,6 +28,9 @@ public:
     bool add_expletive(std::string & expletive);
     bool remove_expletive(std::string & expletive);
     message filter_expletive(message original_message);
+    void detect_unfiltered_expletives(std::vector<std::string> & original_expletives,
+                                      std::vector<std::string> & filtered_expletives,
+                                      std::vector<std::string> & unfiltered_expletives);
 };
 
 #endif /* word_filter_hpp */

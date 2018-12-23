@@ -42,10 +42,8 @@ void sentence_generator::read_words(std::string && file_path, std::vector<std::s
  @param words   a vector used for holding words.
  */
 void sentence_generator::randomly_select_word(message & message, std::mt19937 & mt19937, std::vector<std::string> & words) {
-    std::size_t index;
-
     uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)words.size() - 1));
-    index = uniform_int_distribution(mt19937);
+    auto index = uniform_int_distribution(mt19937);
     message.sentence += words[index] + ' ';
 
     if (std::binary_search(expletives.begin(), expletives.end(), words[index])) {
@@ -90,6 +88,5 @@ message sentence_generator::generate_sentence() {
         }
     }
 
-    message.sentence.erase(message.sentence.size() - 1);
     return message;
 }
