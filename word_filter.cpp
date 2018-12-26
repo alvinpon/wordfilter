@@ -14,7 +14,6 @@ word_filter::word_filter() {
     std::fstream fstream("./dictionary/expletives.txt", fstream.in);
     if (fstream.is_open()) {
         for (std::string expletive; std::getline(fstream, expletive, ',');) {
-            // O(log N)
             expletives[expletive.size() % divisor].insert(expletive);
         }
     }
@@ -24,14 +23,13 @@ word_filter::word_filter() {
  add an expletive into the expletives if the expletive doesn't exist.
 
  @param     expletive   an expletive.
- @return                true if an expletive is added into the expletives.
+ @return    added       true if an expletive is added into the expletives.
  */
 bool word_filter::add_expletive(std::string & expletive) {
     bool added = false;
     std::string::size_type index = expletive.size() % divisor;
 
     if (expletive.empty() == false && expletives[index].count(expletive) == 0) {
-        // O(log N)
         expletives[index].insert(expletive);
         added = true;
     }
@@ -43,17 +41,15 @@ bool word_filter::add_expletive(std::string & expletive) {
  remove an expletive from the expletives if the expletive exists.
 
  @param     expletive   an expletive.
- @return                true if an expletive is removed from the expletives.
+ @return    removed     true if an expletive is removed from the expletives.
  */
 bool word_filter::remove_expletive(std::string & expletive) {
     bool removed = false;
     std::string::size_type index = expletive.size() % divisor;
 
     if (expletive.empty() == false) {
-        // O(log N)
         auto it = expletives[index].find(expletive);
         if (it != expletives[index].end()) {
-            // O(log N)
             expletives[index].erase(it);
             removed = true;
         }
@@ -63,56 +59,66 @@ bool word_filter::remove_expletive(std::string & expletive) {
 }
 
 /**
- filter out expletives within original_message, and return a filtered message.
+ extract all substrings whose length is equal to or greater than 2.
 
- @param     original_message    an original message which contains an original expletive count, selected expletives, and sentence.
- @return    filtered_message    a filtered message which contains a filtered expletive count, selected expletives, and sentence.
+ @param string    a string which contains only 1 word.
  */
-message word_filter::filter_expletive(message original_message) {
-    message filtered_message {0, original_message.sentence};
-    std::regex word_regex("[^\\s]+");
-    std::sregex_iterator begin = std::sregex_iterator(filtered_message.sentence.begin(), filtered_message.sentence.end(), word_regex), end = std::sregex_iterator();
+std::vector<std::string> word_filter::extract_substrings(std::string string) {
+    std::string::size_type size;
+    std::vector<std::string> substrings;
 
-    // O(N)
-    for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
-        std::string word = (*iterator).str();
-        std::string::size_type index = word.size() % divisor;
-
-        // O(log N)
-        if (std::binary_search(expletives[index].begin(), expletives[index].end(), word)) {
-            filtered_message.selected_expletives.push_back(word);
+    size = string.size();
+    for (auto start = 0; start < size; start++) {
+        for (auto end = 2; end <= size - start; end++) {
+            substrings.push_back(string.substr(start, end));
         }
     }
 
-    filtered_message.expletive_count = filtered_message.selected_expletives.size();
-    for (auto & selected_expletive : filtered_message.selected_expletives) {
-        std::regex expletive_regex(selected_expletive);
-        filtered_message.sentence = std::regex_replace(filtered_message.sentence, expletive_regex, std::string(selected_expletive.size(), '*'));
-    }
-
-    return filtered_message;
+    return substrings;
 }
 
 /**
- detect unfiltered expletives.
+ filter out expletives within sentence.
 
- @param     original_expletives     an original expletives.
- @param     filtered expletives     an filtered expletives.
- @param     unfiltered_expletives   an unfiltered expletives.
+ @param sentence    a random sentence which contains 100 words.
  */
-void word_filter::detect_unfiltered_expletives(std::vector<std::string> & original_expletives,
-                                               std::vector<std::string> & filtered_expletives,
-                                               std::vector<std::string> & unfiltered_expletives) {
-    std::vector<std::string>::size_type size = filtered_expletives.size();
+std::vector<std::string> word_filter::filter_expletives(std::string sentence) {
+    std::string string;
+    std::string::size_type index;
+    std::regex word_regex("[^\\s]+");
+    std::vector<std::string> filtered_expletives, substrings;
+    std::sregex_iterator begin = std::sregex_iterator(sentence.begin(), sentence.end(), word_regex), end = std::sregex_iterator();
 
-    unfiltered_expletives = original_expletives;
+    /**
+     time complexity is O(mn).
+     first of all, if sentence contains m words, the time complexity of first loop is O(m).
+     secondly, because we need to examine all substrings (let's assume n substrings) in a word, the time complexity of second loop is O(n).
+     for example, ABCD is a word contained within the sentence. The all substrings are AB, BC, CD, ABC, BCD, ABCD.
+     Architecture:
+     sentence
+        word1
+            substring1, substring2, substring3...
+        word2
+            substring1, substring2, substring3...
+        word3
+            substring1, substring2, substring3...
+          .
+          .
+          .
+     */
+    for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
+        substrings = extract_substrings((*iterator).str());
 
-    // O(MN)
-    for (auto s = 0; unfiltered_expletives.empty() == false && s < size; s++) {
-        auto iterator = std::find(unfiltered_expletives.begin(), unfiltered_expletives.end(), filtered_expletives[s]);
+        for (auto & substring : substrings) {
+            index = substring.size() % divisor;
 
-        if (iterator != unfiltered_expletives.end()) {
-            unfiltered_expletives.erase(iterator);
+            // time complexity of binary search is O(logn).
+            if (std::binary_search(expletives[index].begin(), expletives[index].end(), substring)) {
+                // space complexity is O(mn).
+                filtered_expletives.push_back(substring);
+            }
         }
     }
+
+    return filtered_expletives;
 }

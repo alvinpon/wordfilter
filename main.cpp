@@ -6,38 +6,35 @@
 //  Copyright © 2018 Alvin Pon. All rights reserved.
 //
 
-#include <algorithm>
 #include <chrono>
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <string>
 
-#include "message.hpp"
 #include "sentence_generator.hpp"
 #include "word_filter.hpp"
 
-void write_analysis(std::size_t & total_expletives, std::size_t & total_filtered_expletives) {
-    std::ofstream analysis("./analysis.txt");
+/**
+ write how many expletives are filtered out into the result.txt.
 
-    analysis << "There are "
-             << total_expletives << " expletives that need to be filtered and "
-             << total_filtered_expletives << " expletives that are filtered out.\nAccuracy is "
-             << (float)total_filtered_expletives / total_expletives;
-}
-
-void write_result(std::ofstream & result, message & message1, message & message2, std::vector<std::string> & unfiltered_expletives) {
-    std::vector<std::string>::size_type size = unfiltered_expletives.size();
-
-    result << "original message contains " << message1.expletive_count << " expletives\n" << message1.sentence << "\n\n"
-           << "filtered message contains " << message2.expletive_count << " expletives\n" << message2.sentence << "\n\n";
-
-    result << "There are " << size << " expletives not filtered: ";
-    for (auto & unfiltered_expletive : unfiltered_expletives) {
-        result << unfiltered_expletive << ", ";
+ @param result              an output file stream.
+ @param filtered_expletives a vector which contains all expletives filtered out.
+ */
+void write_result(std::ofstream & result, std::vector<std::string> filtered_expletives) {
+    result << "There are " << filtered_expletives.size() << " expletives filtered out.\n";
+    for (auto filtered_expletive : filtered_expletives) {
+        result << filtered_expletive << ' ';
     }
-    result << '\n' << "Accuracy: " << float(message1.expletive_count - size) / message1.expletive_count << "\n\n";
+    result << "\n\n";
 }
 
+/**
+ calculate time.
+
+ @param start   a start time point
+ @param end     an end time point
+ */
 void calculate_time(std::chrono::time_point<std::chrono::system_clock> start, std::chrono::time_point<std::chrono::system_clock> end) {
     std::time_t start_time, end_time;
     std::chrono::duration<double> elapsed_seconds;
@@ -46,41 +43,33 @@ void calculate_time(std::chrono::time_point<std::chrono::system_clock> start, st
     end_time = std::chrono::system_clock::to_time_t(end);
     elapsed_seconds = end - start;
 
-    std::cout << std::ctime(&start_time)
-              << std::ctime(&end_time)
-              << "elapsed time: "  << elapsed_seconds.count() << "s" << std::endl;
+    std::cout << std::ctime(&start_time) << std::ctime(&end_time) << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 }
 
-void filter(std::size_t & total_expletives, std::size_t & total_filtered_expletives) {
+/**
+ filter out all expltives within a sentence which contains at least 100 words generated randomly by uniform distribution.
+ */
+void filter() {
+    std::string sentence;
     std::ofstream result("./result.txt");
-    std::vector<std::string> unfiltered_expletives;
-    message message1, message2;
-    sentence_generator sentence_generator;
     word_filter word_filter;
+    sentence_generator sentence_generator;
 
+    /**
+     time complexity is O(n) because it only goes through once.
+     */
     for (std::size_t i = 1; i <= 200000; i++) {
-        message1 = sentence_generator.generate_sentence();
-        message2 = word_filter.filter_expletive(message1);
-
-        word_filter.detect_unfiltered_expletives(message1.selected_expletives, message2.selected_expletives, unfiltered_expletives);
-
-        total_expletives += message1.expletive_count;
-        total_filtered_expletives += message1.expletive_count - unfiltered_expletives.size();
-
-        write_result(result, message1, message2, unfiltered_expletives);
+        write_result(result, word_filter.filter_expletives(sentence_generator.generate_sentence()));
     }
 }
 
 int main(int argc, const char * argv[]) {
-    std::size_t total_expletives = 0, total_filtered_expletives = 0;
-
     auto start = std::chrono::system_clock::now();
     std::cout << "expletives are being filtered." << std::endl;
-    filter(total_expletives, total_filtered_expletives);
+    filter();
     std::cout << "expletives have been filtered." << std::endl;
     auto end = std::chrono::system_clock::now();
 
     calculate_time(start, end);
-    write_analysis(total_expletives, total_filtered_expletives);
     return 0;
 }

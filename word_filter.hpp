@@ -15,23 +15,19 @@
 #include <set>
 #include <string>
 
-#include "message.hpp"
-
 class word_filter {
 private:
     std::string::size_type divisor;
-    // O(N)
     std::map<std::string::size_type, std::set<std::string>> expletives;
+
+    std::vector<std::string> extract_substrings(std::string string);
 
 public:
     word_filter();
 
     bool add_expletive(std::string & expletive);
     bool remove_expletive(std::string & expletive);
-    message filter_expletive(message original_message);
-    void detect_unfiltered_expletives(std::vector<std::string> & original_expletives,
-                                      std::vector<std::string> & filtered_expletives,
-                                      std::vector<std::string> & unfiltered_expletives);
+    std::vector<std::string> filter_expletives(std::string sentence);
 };
 
 #endif /* word_filter_hpp */
