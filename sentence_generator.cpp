@@ -42,7 +42,6 @@ std::string sentence_generator::generate_sentence() {
     std::mt19937 mt19937;
     std::uniform_int_distribution<> uniform_int_distribution;
 
-    sentence.clear();
     mt19937 = std::mt19937(random_device());
 
     for (std::size_t i = 0; i < 100; i++) {
@@ -79,5 +78,6 @@ std::string sentence_generator::generate_sentence() {
         }
     }
 
+    sentence.pop_back();
     return sentence;
 }

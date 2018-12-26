@@ -12,19 +12,23 @@
 #include <iostream>
 #include <string>
 
+#include "message.hpp"
 #include "sentence_generator.hpp"
 #include "word_filter.hpp"
 
 /**
- write how many expletives are filtered out into the result.txt.
+ write filtered result
 
- @param result              an output file stream.
- @param filtered_expletives a vector which contains all expletives filtered out.
+ @param result  a output file stream
+ @param message a message which contains original sentence, filtered sentence, and filtered expletives.
  */
-void write_result(std::ofstream & result, std::vector<std::string> filtered_expletives) {
-    result << "There are " << filtered_expletives.size() << " expletives filtered out.\n";
-    for (auto filtered_expletive : filtered_expletives) {
-        result << filtered_expletive << ' ';
+void write_result(std::ofstream & result, message message) {
+    result << message.original_sentence << "\n\n"
+           << message.filtered_sentence << "\n\n"
+           << message.filtered_expletives.size() << " expletives filtered out.\n";
+
+    for (auto filtered_expletive : message.filtered_expletives) {
+        result << filtered_expletive << ", ";
     }
     result << "\n\n";
 }
@@ -48,17 +52,16 @@ void calculate_time(std::chrono::time_point<std::chrono::system_clock> start, st
 
 /**
  filter out all expltives within a sentence which contains at least 100 words generated randomly by uniform distribution.
+
+ time complexity is O(n) because it only goes through once.
  */
 void filter() {
     std::string sentence;
-    std::ofstream result("./result.txt");
     word_filter word_filter;
     sentence_generator sentence_generator;
+    std::ofstream result("./result.txt");
 
-    /**
-     time complexity is O(n) because it only goes through once.
-     */
-    for (std::size_t i = 1; i <= 200000; i++) {
+    for (std::size_t i = 0; i < 200000; i++) {
         write_result(result, word_filter.filter_expletives(sentence_generator.generate_sentence()));
     }
 }

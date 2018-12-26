@@ -61,9 +61,9 @@ bool word_filter::remove_expletive(std::string & expletive) {
 /**
  extract all substrings whose length is equal to or greater than 2.
 
- @param string    a string which contains only 1 word.
+ @param string  a string which contains only 1 word.
  */
-std::vector<std::string> word_filter::extract_substrings(std::string string) {
+std::vector<std::string> word_filter::extract_substrings(std::string & string) {
     std::string::size_type size;
     std::vector<std::string> substrings;
 
@@ -78,47 +78,71 @@ std::vector<std::string> word_filter::extract_substrings(std::string string) {
 }
 
 /**
- filter out expletives within sentence.
+ replace the word.
 
- @param sentence    a random sentence which contains 100 words.
+ @param replaced_word       a word needed to be replaced.
+ @param substrings          all substrings of replaced word.
+ @param filtered_expletives filtered expletives.
  */
-std::vector<std::string> word_filter::filter_expletives(std::string sentence) {
-    std::string string;
-    std::string::size_type index;
-    std::regex word_regex("[^\\s]+");
-    std::vector<std::string> filtered_expletives, substrings;
-    std::sregex_iterator begin = std::sregex_iterator(sentence.begin(), sentence.end(), word_regex), end = std::sregex_iterator();
+void word_filter::replace_word(std::string & replaced_word,
+                               std::vector<std::string> substrings,
+                               std::vector<std::string> & filtered_expletives) {
+    std::string::size_type key_index, index, size;
 
-    /**
-     time complexity is O(mn).
-     first of all, if sentence contains m words, the time complexity of first loop is O(m).
-     secondly, because we need to examine all substrings (let's assume n substrings) in a word, the time complexity of second loop is O(n).
-     for example, ABCD is a word contained within the sentence. The all substrings are AB, BC, CD, ABC, BCD, ABCD.
-     Architecture:
-     sentence
-        word1
-            substring1, substring2, substring3...
-        word2
-            substring1, substring2, substring3...
-        word3
-            substring1, substring2, substring3...
-          .
-          .
-          .
-     */
-    for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
-        substrings = extract_substrings((*iterator).str());
+    std::sort(substrings.begin(), substrings.end(), [](std::string & string1, std::string & string2) {
+        return string1.size() > string2.size();
+    });
 
-        for (auto & substring : substrings) {
-            index = substring.size() % divisor;
+    for (auto & substring : substrings) {
+        key_index = substring.size() % divisor;
 
-            // time complexity of binary search is O(logn).
-            if (std::binary_search(expletives[index].begin(), expletives[index].end(), substring)) {
-                // space complexity is O(mn).
-                filtered_expletives.push_back(substring);
+        if (std::binary_search(expletives[key_index].begin(), expletives[key_index].end(), substring)) {
+            if ((index = replaced_word.find(substring)) != std::string::npos) {
+                size = substring.size();
+                replaced_word.replace(index, size, std::string(size, '*'));
             }
+
+            filtered_expletives.push_back(substring);
         }
     }
+}
 
-    return filtered_expletives;
+/**
+ filter out expletives within sentence.
+
+ @param     original_sentence   a random sentence which contains 100 words.
+ @return    message             a message which contains original sentence, filtered sentence, and filtered expletives.
+
+ time complexity is O(mn).
+ first of all, the time complexity of the loop is O(m) because sentence contains m words. secondly, because we need to examine all substrings
+ (let's assume n substrings) in a word, the time complexity of the replace_word member function is O(n). for example, abcd is a word contained
+ within the sentence, so all substrings are ab, bc, cd, abc, bcd, abcd. The reason why I don't write a, b, c and d is that a character shouldn't
+ be recognized as an expltives.
+
+ sentence
+    word1
+        substring1, substring2, substring3...
+    word2
+        substring1, substring2, substring3...
+    word3
+        substring1, substring2, substring3...
+ */
+message word_filter::filter_expletives(std::string original_sentence) {
+    std::regex word_regex;
+    std::string filtered_sentence, word;
+    std::sregex_iterator begin, end;
+    std::vector<std::string> filtered_expletives;
+
+    word_regex = std::regex("[^\\s]+");
+    begin = std::sregex_iterator(original_sentence.begin(), original_sentence.end(), word_regex);
+    end = std::sregex_iterator();
+
+    for (std::sregex_iterator iterator = begin; iterator != end; iterator++) {
+        word = (*iterator).str();
+        replace_word(word, extract_substrings(word), filtered_expletives);
+        filtered_sentence += word + ' ';
+    }
+    filtered_sentence.pop_back();
+
+    return message {original_sentence, filtered_sentence, filtered_expletives};
 }
