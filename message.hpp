@@ -12,9 +12,13 @@
 #include <array>
 #include <set>
 #include <string>
+#include <vector>
+
+#include "substring.hpp"
 
 struct message {
     std::array<std::string, 100> original_words, filtered_words;
+    std::vector<substring> substrings;
     std::set<std::string> filtered_expletives;
 };
 

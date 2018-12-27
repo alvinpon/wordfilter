@@ -9,6 +9,7 @@
 #ifndef sentence_generator_hpp
 #define sentence_generator_hpp
 
+#include <algorithm>
 #include <fstream>
 #include <random>
 #include <string>

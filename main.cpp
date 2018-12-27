@@ -17,9 +17,9 @@
 #include "word_filter.hpp"
 
 /**
- write a result about filtered message.
+ write a result.
 
- @param result  a output file stream
+ @param result  an output file stream.
  @param message a message which contains original sentence, filtered sentence, and filtered expletives.
  */
 void write_result(std::ofstream & result, message & message) {
@@ -59,23 +59,18 @@ void calculate_time(std::chrono::time_point<std::chrono::system_clock> start, st
 
 /**
  filter out all expltives within an array which contains at least 100 words generated randomly by uniform distribution.
-
- time complexity is O(n) because it only goes through once.
-
- 200k test cases.
  */
 void filter() {
-    std::ofstream result;
+    std::ofstream result("./result.txt");
     message message;
     word_filter word_filter;
     sentence_generator sentence_generator;
-
-    result = std::ofstream("./result.txt");
 
     for (std::size_t i = 0; i < 200000; i++) {
         sentence_generator.generate_sentence(message);
         word_filter.filter_expletives(message);
         write_result(result, message);
+        message = {};
     }
 }
 
