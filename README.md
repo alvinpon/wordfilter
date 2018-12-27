@@ -2,6 +2,7 @@
 ## Development
 ### Data Structures
 - Array:
+    - std::array
     - std::vector
 - Hash Table:
     - std::map

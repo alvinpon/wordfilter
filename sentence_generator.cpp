@@ -34,10 +34,9 @@ void sentence_generator::load_words(std::string && file_path, std::vector<std::s
 }
 
 /**
- generate a sentence which will contain a plethora of words selected randomly by uniform distribution.
+ generate an original words which will contain a plethora of words selected randomly by uniform distribution.
  */
-std::string sentence_generator::generate_sentence() {
-    std::string sentence;
+void sentence_generator::generate_sentence(message & message) {
     std::random_device random_device;
     std::mt19937 mt19937;
     std::uniform_int_distribution<> uniform_int_distribution;
@@ -49,35 +48,32 @@ std::string sentence_generator::generate_sentence() {
         switch (uniform_int_distribution(mt19937)) {
             case 0:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)adjectives.size() - 1));
-                sentence += adjectives[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = adjectives[uniform_int_distribution(mt19937)];
                 break;
             case 1:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)adverbs.size() - 1));
-                sentence += adverbs[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = adverbs[uniform_int_distribution(mt19937)];
                 break;
             case 2:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)expletives.size() - 1));
-                sentence += expletives[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = expletives[uniform_int_distribution(mt19937)];
                 break;
             case 3:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)nouns.size() - 1));
-                sentence += nouns[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = nouns[uniform_int_distribution(mt19937)];
                 break;
             case 4:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)prepositions.size() - 1));
-                sentence += prepositions[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = prepositions[uniform_int_distribution(mt19937)];
                 break;
             case 5:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)pronouns.size() - 1));
-                sentence += pronouns[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = pronouns[uniform_int_distribution(mt19937)];
                 break;
             default:
                 uniform_int_distribution.param(std::uniform_int_distribution<>::param_type(0, (int)verbs.size() - 1));
-                sentence += verbs[uniform_int_distribution(mt19937)] + ' ';
+                message.original_words[i] = verbs[uniform_int_distribution(mt19937)];
                 break;
         }
     }
-
-    sentence.pop_back();
-    return sentence;
 }

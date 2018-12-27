@@ -17,17 +17,24 @@
 #include "word_filter.hpp"
 
 /**
- write filtered result
+ write a result about filtered message.
 
  @param result  a output file stream
  @param message a message which contains original sentence, filtered sentence, and filtered expletives.
  */
-void write_result(std::ofstream & result, message message) {
-    result << message.original_sentence << "\n\n"
-           << message.filtered_sentence << "\n\n"
-           << message.filtered_expletives.size() << " expletives filtered out.\n";
+void write_result(std::ofstream & result, message & message) {
+    for (const std::string & original_word : message.original_words) {
+        result << original_word << ' ';
+    }
+    result << "\n\n";
 
-    for (auto filtered_expletive : message.filtered_expletives) {
+    for (const std::string & filtered_word : message.filtered_words) {
+        result << filtered_word << ' ';
+    }
+    result << "\n\n";
+
+    result << message.filtered_expletives.size() << " expletives filtered out.\n";
+    for (const std::string & filtered_expletive : message.filtered_expletives) {
         result << filtered_expletive << ", ";
     }
     result << "\n\n";
@@ -51,18 +58,24 @@ void calculate_time(std::chrono::time_point<std::chrono::system_clock> start, st
 }
 
 /**
- filter out all expltives within a sentence which contains at least 100 words generated randomly by uniform distribution.
+ filter out all expltives within an array which contains at least 100 words generated randomly by uniform distribution.
 
  time complexity is O(n) because it only goes through once.
+
+ 200k test cases.
  */
 void filter() {
-    std::string sentence;
+    std::ofstream result;
+    message message;
     word_filter word_filter;
     sentence_generator sentence_generator;
-    std::ofstream result("./result.txt");
+
+    result = std::ofstream("./result.txt");
 
     for (std::size_t i = 0; i < 200000; i++) {
-        write_result(result, word_filter.filter_expletives(sentence_generator.generate_sentence()));
+        sentence_generator.generate_sentence(message);
+        word_filter.filter_expletives(message);
+        write_result(result, message);
     }
 }
 

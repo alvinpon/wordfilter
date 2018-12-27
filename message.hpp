@@ -9,12 +9,13 @@
 #ifndef message_hpp
 #define message_hpp
 
+#include <array>
+#include <set>
 #include <string>
-#include <vector>
 
 struct message {
-    std::string original_sentence, filtered_sentence;
-    std::vector<std::string> filtered_expletives;
+    std::array<std::string, 100> original_words, filtered_words;
+    std::set<std::string> filtered_expletives;
 };
 
 #endif /* message_hpp */

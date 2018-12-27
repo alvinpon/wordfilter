@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "message.hpp"
+
 class sentence_generator {
 private:
     std::vector<std::string> adjectives, adverbs, expletives, nouns, prepositions, pronouns, verbs;
@@ -23,7 +25,7 @@ private:
 public:
     sentence_generator();
     
-    std::string generate_sentence();
+    void generate_sentence(message & message);
 };
 
 #endif /* sentence_generator_hpp */
