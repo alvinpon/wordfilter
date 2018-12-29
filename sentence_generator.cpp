@@ -19,10 +19,10 @@ sentence_generator::sentence_generator() {
 }
 
 /**
- load all words from dictionary folder into different vectors.
+ load all words from the dictionary folder into different vectors.
 
  @param file_path   a string descripting where your file is.
- @param words       a vector hoding different words.
+ @param words       a vector which will hold different words.
  */
 void sentence_generator::load_words(std::string && file_path, std::vector<std::string> & words) {
     std::fstream fstream(file_path);
@@ -32,9 +32,10 @@ void sentence_generator::load_words(std::string && file_path, std::vector<std::s
         }
     }
 }
-
 /**
  generate a sentence which will contain a plethora of words randomly selected by uniform distribution.
+
+ @param message a message which contains original sentence, filtered sentence, substrings, and filtered expletives.
  */
 void sentence_generator::generate_sentence(message & message) {
     std::mt19937 mt19937;
@@ -75,17 +76,5 @@ void sentence_generator::generate_sentence(message & message) {
                 message.original_words[i] = verbs[uniform_int_distribution(mt19937)];
                 break;
         }
-
-        auto size = message.original_words[i].size();
-        for (auto start = 0; start < size; start++) {
-            for (auto end = 2; end <= size - start; end++) {
-                message.substrings.push_back(substring{i, message.original_words[i].substr(start, end)});
-            }
-        }
     }
-
-    message.filtered_words = message.original_words;
-    std::sort(message.substrings.begin(), message.substrings.end(), [](substring & string1, substring & string2) {
-        return string1.word.size() > string2.word.size();
-    });
 }

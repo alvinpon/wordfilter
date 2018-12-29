@@ -17,10 +17,10 @@
 #include "word_filter.hpp"
 
 /**
- write a result.
+ write a result about filtered message.
 
- @param result  an output file stream.
- @param message a message which contains original sentence, filtered sentence, and filtered expletives.
+ @param result  an output file stream
+ @param message a message which contains original sentence, filtered sentence, substrings, and filtered expletives.
  */
 void write_result(std::ofstream & result, message & message) {
     for (const std::string & original_word : message.original_words) {
@@ -68,6 +68,7 @@ void filter() {
 
     for (std::size_t i = 0; i < 200000; i++) {
         sentence_generator.generate_sentence(message);
+        word_filter.extract_substrings(message);
         word_filter.filter_expletives(message);
         write_result(result, message);
         message = {};

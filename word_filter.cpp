@@ -24,7 +24,7 @@ word_filter::word_filter() {
  @param     expletive   an expletive.
  @return    added       true if an expletive is added into the expletives.
  */
-bool word_filter::add_expletive(std::string & expletive) {
+bool word_filter::add_expletive(const std::string & expletive) {
     bool added = false;
 
     if (expletive.empty() == false && expletives.count(expletive) == 0) {
@@ -41,11 +41,11 @@ bool word_filter::add_expletive(std::string & expletive) {
  @param     expletive   an expletive.
  @return    removed     true if an expletive is removed from the expletives.
  */
-bool word_filter::remove_expletive(std::string & expletive) {
+bool word_filter::remove_expletive(const std::string & expletive) {
     bool removed = false;
-    std::set<std::string>::iterator iterator;
+    auto iterator = expletives.find(expletive);
 
-    if (expletive.empty() == false && (iterator = expletives.find(expletive)) != expletives.end()) {
+    if (expletive.empty() == false && iterator != expletives.end()) {
         expletives.erase(iterator);
         removed = true;
     }
@@ -54,14 +54,40 @@ bool word_filter::remove_expletive(std::string & expletive) {
 }
 
 /**
- filter out all expletives within an array.
+ extract all substrings
 
- time complexity is O(n) because this function only goes all substrings once.
+ @param message a message which contains original sentence, filtered sentence, substrings, and filtered expletives.
+ */
+void word_filter::extract_substrings(message & message) {
+    std::string::size_type size;
+
+    for (std::array<std::string, 100>::size_type i = 0; i < 100; i++) {
+        size = message.original_words[i].size();
+
+        for (std::string::size_type start = 0; start < size; start++) {
+            for (std::string::difference_type end = size; end - start >= 2; end--) {
+                message.substrings.push(substring{i, message.original_words[i].substr(start, end)});
+            }
+        }
+    }
+}
+
+/**
+ filter out all expletives within an array.
+ time complexity is O(n) because this function only goes through all substrings once.
+
+ @param message a message which contains original sentence, filtered sentence, substrings, and filtered expletives.
  */
 void word_filter::filter_expletives(message & message) {
+    substring substring;
     std::string::size_type replaced_index, size;
 
-    for (substring & substring : message.substrings) {
+    message.filtered_words = message.original_words;
+
+    while (message.substrings.empty() == false) {
+        substring = message.substrings.front();
+        message.substrings.pop();
+
         if (expletives.count(substring.word) == 1) {
             if ((replaced_index = message.filtered_words[substring.index].find(substring.word)) != std::string::npos) {
                 size = substring.word.size();

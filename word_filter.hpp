@@ -9,11 +9,13 @@
 #ifndef word_filter_hpp
 #define word_filter_hpp
 
+#include <array>
 #include <fstream>
 #include <set>
 #include <string>
 
 #include "message.hpp"
+#include "substring.hpp"
 
 class word_filter {
 private:
@@ -22,9 +24,10 @@ private:
 public:
     word_filter();
 
-    bool add_expletive(std::string & expletive);
-    bool remove_expletive(std::string & expletive);
+    bool add_expletive(const std::string & expletive);
+    bool remove_expletive(const std::string & expletive);
     void filter_expletives(message & message);
+    void extract_substrings(message & message);
 };
 
 #endif /* word_filter_hpp */
